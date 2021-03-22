@@ -1,23 +1,26 @@
 #!/usr/bin/python
 # coding: UTF-8
-
+from const import PARSERS, REQUESTERS
+from util import execute
+import util.fuzz as fuzz
 import sys
 from itertools import product
 from multiprocessing.dummy import Pool as ThreadPool
+print("outside fuzz is called")
 
-import util.fuzz as fuzz
-from util import cmd, pprint, execute
-from const import PARSERS, REQUESTERS
 
 DEBUG = 'debug' in sys.argv
 
 INS_COUNT = [0, 3, 0]
 WHITELIST = ['127.0.0.1', '127.1.1.1', '127.2.2.2', '127.1.1.1\n127.2.2.2']
 CHARSETS = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0cA01\x00'
-FORMAT = 'http://%s127.1.1.1%s127.2.2.2%s' % ('%c'*INS_COUNT[0], '%c'*INS_COUNT[1], '%c'*INS_COUNT[2])
+FORMAT = 'http://%s127.1.1.1%s127.2.2.2%s' % (
+    '%c'*INS_COUNT[0], '%c'*INS_COUNT[1], '%c'*INS_COUNT[2])
+
 
 def _print(msg):
     sys.stdout.write("%s\n" % msg)
+
 
 def run_parser(url):
     res = {}
@@ -33,6 +36,7 @@ def run_parser(url):
 
     return res
 
+
 def run_requester(url):
     res = {}
     for key, binary in REQUESTERS.iteritems():
@@ -41,6 +45,7 @@ def run_requester(url):
         r = execute(lang, binary, url, base='bin/requester/')
         res[key] = r
     return res
+
 
 def run(random_data):
     url = FORMAT % random_data
@@ -51,7 +56,7 @@ def run(random_data):
     gets = run_requester(url)
 
     total_urls = {}
-    for k,v in urls.iteritems():
+    for k, v in urls.iteritems():
 
         # filter
         if v not in WHITELIST:
@@ -65,10 +70,9 @@ def run(random_data):
     if len(total_urls) > 1:
         msg = 'parsed url = %s\n' % url
         for k, v in sorted(total_urls.iteritems(), key=lambda x: len(x[1]), reverse=True):
-            msg += '%-16s %d = %s\n'%(k, len(v), repr(v))
+            msg += '%-16s %d = %s\n' % (k, len(v), repr(v))
 
         _print(msg)
-
 
     total_gets = {}
     for k, v in gets.iteritems():
@@ -84,15 +88,16 @@ def run(random_data):
             total_gets[v] = [k]
 
     if len(total_gets) > 1:
-        msg = 'got url = %s\n'%url
+        msg = 'got url = %s\n' % url
         for k, v in sorted(total_gets.iteritems(), key=lambda x: len(x[1]), reverse=True):
-            msg += '%-24s %d = %s\n'%(k, len(v), repr(v))
+            msg += '%-24s %d = %s\n' % (k, len(v), repr(v))
         _print(msg)
 
 
 data_set = product(list(CHARSETS), repeat=sum(INS_COUNT))
 if DEBUG:
-    for i in data_set: run(i)
+    for i in data_set:
+        run(i)
 else:
-    pool = ThreadPool( 32 )
-    result = pool.map_async( run, data_set ).get(0xfffff)
+    pool = ThreadPool(32)
+    result = pool.map_async(run, data_set).get(0xfffff)

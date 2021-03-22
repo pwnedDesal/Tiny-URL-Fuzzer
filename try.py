@@ -1,22 +1,20 @@
-#!/usr/bin/python
+#!/usr/local/bin/python3.9
 # coding: UTF-8
 import sys
-
-from util import cmd, pprint, execute
+# ty
+from util import pprint, execute
 from const import PARSERS, REQUESTERS
-
-URL = '\n'.join(sys.argv[1:])
+url = sys.argv[1]
 res = {}
-for key, binary in PARSERS.iteritems():
+for key, binary in PARSERS.items():
     lang, libname = key.split('.', 1)
-
-    r = execute(lang, binary, URL, base='bin/parser/')
+    r = execute(lang, binary, url, base='bin/parser/')
     res[key] = r
 pprint(res)
 
 res = {}
-for key, binary in REQUESTERS.iteritems():
+for key, binary in REQUESTERS.items():
     lang, libname = key.split('.', 1)
-    r = execute(lang, binary, URL, base='bin/requester/')
+    r = execute(lang, binary, url, base='bin/requester/')
     res[key] = r
 pprint(res)

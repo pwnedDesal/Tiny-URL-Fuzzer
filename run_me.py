@@ -49,7 +49,7 @@ if __name__ == '__main__':
 	This script will change your IPTABLES and DNS config
 	Be awared before you change it
 	'''
-	print 'Read the source code'
+	print('Read the source code')
 	exit()
 
 	m = sys.argv[1]
